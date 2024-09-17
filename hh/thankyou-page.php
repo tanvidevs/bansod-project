@@ -112,7 +112,8 @@ if (!isset($_SESSION['name']) || !isset($_SESSION['phone']) || !isset($_SESSION[
         <p class="text-gray-600">No Credit Card required</p>
       </div>
 
-      <a href="#" class="inline-block rounded-lg bg-orange-500 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-orange-600 focus-visible:ring active:bg-indigo-700 md:text-base">Start now</a>
+      <a href="https://wa.me/919325152367?text=I%20want%20to%20join%20your%20team
+" class="inline-block rounded-lg bg-orange-500 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-orange-600 focus-visible:ring active:bg-indigo-700 md:text-base">Start now</a>
     </div>
   </div>
 </div>
@@ -120,7 +121,7 @@ if (!isset($_SESSION['name']) || !isset($_SESSION['phone']) || !isset($_SESSION[
 
 
     <!-- Testimonial -->
-<section class="text-gray-600 body-font mr-0 md:mr-36 ml-0 md:ml-36">
+<section class="text-gray-600 body-font mr-0 md:mr-36 ml-0 md:ml-36 ">
     <div class="container px-5 mx-auto">
       <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">Testi<span class="text-orange-600">monials</span></h2>
       <div class="flex overflow-x-auto space-x-4 -m-4 pb-5  ">
@@ -213,7 +214,7 @@ if (!isset($_SESSION['name']) || !isset($_SESSION['phone']) || !isset($_SESSION[
 
 
     <!-- footer -->
-    <div class="bg-orange-50 pt-4 sm:pt-10 lg:pt-12">
+    <div class="bg-orange-50 mt-20 sm:pt-10 lg:pt-12">
       <footer class="mx-auto max-w-screen-2xl px-4 md:px-8">
         <div class="flex flex-col items-center border-t pt-6">
           <img src="https://dummyimage.com/300x100/000/fff" class="mb-4" alt="">
@@ -269,5 +270,14 @@ if (!isset($_SESSION['name']) || !isset($_SESSION['phone']) || !isset($_SESSION[
         collapse.classList.toggle("flex");
         };
       </script>
+
+<script async src='https://d2mpatx37cqexb.cloudfront.net/delightchat-whatsapp-widget/embeds/embed.min.js'></script>
+        <script>
+          var wa_btnSetting = {"btnColor":"#16BE45","ctaText":"WhatsApp Us","cornerRadius":40,"marginBottom":20,"marginLeft":20,"marginRight":20,"btnPosition":"right","whatsAppNumber":"919325152367","welcomeMessage":" i want to join your team","zIndex":999999,"btnColorScheme":"light"};
+          window.onload = () => {
+            _waEmbed(wa_btnSetting);
+          };
+        </script>
+      
 </body>
 </html>
