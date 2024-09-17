@@ -46,6 +46,17 @@ $conn->close();
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
  
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom CSS for Parallax Effect */
+    .parallax {
+      background-image: url('https://dummyimage.com/600x400/000/fff');
+      min-height: 500px;
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+  </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -229,6 +240,16 @@ $conn->close();
       </div>
     </div>
 </section>
+
+
+ <!-- Parallax Section -->
+ <div class="parallax flex items-center justify-center">
+    <div class="text-center text-white">
+      <h1 class="text-5xl font-bold">Welcome to Our Website</h1>
+      <p class="text-xl mt-4">Experience the beauty of the world with us.</p>
+    </div>
+  </div>
+
 
 
 <!-- why choose you -->
@@ -462,5 +483,15 @@ $conn->close();
         collapse.classList.toggle("flex");
         };
       </script>
+
+
+<script async src='https://d2mpatx37cqexb.cloudfront.net/delightchat-whatsapp-widget/embeds/embed.min.js'></script>
+        <script>
+          var wa_btnSetting = {"btnColor":"#16BE45","ctaText":"WhatsApp Us","cornerRadius":40,"marginBottom":20,"marginLeft":20,"marginRight":20,"btnPosition":"right","whatsAppNumber":"919325152367","welcomeMessage":" i want to join your team","zIndex":999999,"btnColorScheme":"light"};
+          window.onload = () => {
+            _waEmbed(wa_btnSetting);
+          };
+        </script>
+      
 </body>
 </html>
