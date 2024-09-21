@@ -1,44 +1,82 @@
 <?php
-// Start session to store form data
 session_start();
+ob_start();
 
-// Include your database connection
-include './dbcon.php';
+include './dbcon.php'; // Database connection
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+require './phpmailer/Exception.php';
+require './phpmailer/PHPMailer.php';
+require './phpmailer/SMTP.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get the form data
-    $name = $_POST['name'];
-    $phone = $_POST['phone'];
-    $email = $_POST['email'];
+    $name = trim($_POST['name']);
+    $phone = trim($_POST['phone']);
+    $email = trim($_POST['email']);
 
-    // Validate that fields are not empty
+    // Basic validation
     if (!empty($name) && !empty($phone) && !empty($email)) {
-        // Insert data into the database
-        $stmt = $conn->prepare("INSERT INTO contact (name, phone, email) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $name, $phone, $email);
-        
-        if ($stmt->execute()) {
-            // Store form data in session to access on the thankyou.php page
-            $_SESSION['name'] = $name;
-            $_SESSION['phone'] = $phone;
-            $_SESSION['email'] = $email;
-            
-            // Redirect to thankyou.php after form submission
-            header("Location: thankyou-page.php");
-            exit();
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Insert data into the database
+            $stmt = $conn->prepare("INSERT INTO contact (name, phone, email) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $name, $phone, $email);
+
+            if ($stmt->execute()) {
+                // Store form data in session
+                $_SESSION['name'] = $name;
+                $_SESSION['phone'] = $phone;
+                $_SESSION['email'] = $email;
+
+                // PHPMailer Setup
+                $mail = new PHPMailer(true);
+
+                try {
+                    // Server settings
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'tanvimirasedeveloper@gmail.com';  // Use your Gmail address
+                    $mail->Password = 'uzjasvlynsehwweh';  // Use the generated app password from Google
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                    $mail->Port = 465;
+
+                    // Recipients
+                    $mail->setFrom('tanvimirasedeveloper@gmail.com', 'Contact Form');
+                    $mail->addAddress('tanvimirase2000@gmail.com', 'Apni Website');  // Recipient
+
+                    // Content
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Contact Form Submission';
+                    $mail->Body    = "Sender Name: $name <br> Sender Email: $email <br> Sender Phone: $phone";
+
+                    $mail->send();
+                    echo 'Message has been sent';
+
+                    // Redirect to thankyou page
+                    header("Location: thankupage.php");
+                    ob_end_flush();
+                    exit();
+                } catch (Exception $e) {
+                    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                }
+            } else {
+                echo "Error: " . $stmt->error;
+            }
+            $stmt->close();
         } else {
-            echo "Error: " . $stmt->error;
+            echo "Invalid email format!";
         }
-        $stmt->close();
     } else {
         echo "All fields are required!";
     }
 }
+
 $conn->close();
-?>
-
-
-
+?> 
 <!doctype html>
 <html>
 <head>
@@ -413,18 +451,11 @@ $conn->close();
           </div>
         </div>
       </form>
-     
     </div>
   </div>
 </section>
 
 
-
-
-
-
-
-    
 
     <!-- footer -->
     <div class="bg-orange-50 pt-4 sm:pt-10 lg:pt-12">
