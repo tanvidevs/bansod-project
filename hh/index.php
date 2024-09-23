@@ -1,109 +1,32 @@
 <?php
+// Start session to retrieve form data
 session_start();
-ob_start();
 
-include './dbcon.php'; // Database connection
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
-require './phpmailer/Exception.php';
-require './phpmailer/PHPMailer.php';
-require './phpmailer/SMTP.php';
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get the form data
-    $name = trim($_POST['name']);
-    $phone = trim($_POST['phone']);
-    $email = trim($_POST['email']);
-
-    // Basic validation
-    if (!empty($name) && !empty($phone) && !empty($email)) {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            // Insert data into the database
-            $stmt = $conn->prepare("INSERT INTO contact (name, phone, email) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $name, $phone, $email);
-
-            if ($stmt->execute()) {
-                // Store form data in session
-                $_SESSION['name'] = $name;
-                $_SESSION['phone'] = $phone;
-                $_SESSION['email'] = $email;
-
-                // PHPMailer Setup
-                $mail = new PHPMailer(true);
-
-                try {
-                    // Server settings
-                    $mail->isSMTP();
-                    $mail->Host = 'smtp.gmail.com';
-                    $mail->SMTPAuth = true;
-                    $mail->Username = 'tanvimirasedeveloper@gmail.com';  // Use your Gmail address
-                    $mail->Password = 'uzjasvlynsehwweh';  // Use the generated app password from Google
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-                    $mail->Port = 465;
-
-                    // Recipients
-                    $mail->setFrom('tanvimirasedeveloper@gmail.com', 'Contact Form');
-                    $mail->addAddress('tanvimirase2000@gmail.com', 'Apni Website');  // Recipient
-
-                    // Content
-                    $mail->isHTML(true);
-                    $mail->Subject = 'Contact Form Submission';
-                    $mail->Body    = "Sender Name: $name <br> Sender Email: $email <br> Sender Phone: $phone";
-
-                    $mail->send();
-                    echo 'Message has been sent';
-
-                    // Redirect to thankyou page
-                    header("Location: thankupage.php");
-                    ob_end_flush();
-                    exit();
-                } catch (Exception $e) {
-                    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                }
-            } else {
-                echo "Error: " . $stmt->error;
-            }
-            $stmt->close();
-        } else {
-            echo "Invalid email format!";
-        }
-    } else {
-        echo "All fields are required!";
-    }
+// Check if the session variables exist, else redirect back to form page
+if (!isset($_SESSION['name']) || !isset($_SESSION['phone']) || !isset($_SESSION['email'])) {
+    header("Location: index.php");  // Redirect to form page if no data is available
+    exit();
 }
+?>
 
-$conn->close();
-?> 
 <!doctype html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Custom CSS for Parallax Effect */
-    .parallax {
-      background-image: url('https://dummyimage.com/600x400/000/fff');
-      min-height: 500px;
-      background-attachment: fixed;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-  </style>
 </head>
 <body>
     <!-- Navbar -->
-     <div class="bg-white sticky top-0 z-50">
-      <nav class="bg-white py-2 md:py-4 mr-0 md:mr-28 ml-0 md:ml-28 border-b border-gray-200 border-b-orange-600">
+    <div class="bg-white sticky top-0 z-50">
+    <nav class="bg-white py-2 md:py-4 mr-0 md:mr-28 ml-0 md:ml-28 border-b border-gray-200 border-b-orange-600">
                 <div class="container px-4 mx-auto md:flex md:items-center">
             
                   <div class="flex justify-between items-center">
-                    <a href="#" class="font-bold text-2xl text-orange-600">Parthamesh Bansod</a>
+                    <a href="#">
+                    <h2 class="font-bold text-2xl"><span class="text-orange-600">Prathamesh</span> Bansod</h2>
+                    </a>
                     <button class="border border-solid border-gray-600 px-3 py-1 rounded text-gray-600 opacity-50 hover:opacity-75 md:hidden" id="navbar-toggle">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
@@ -114,11 +37,11 @@ $conn->close();
             
                   <div class="hidden md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0" id="navbar-collapse">
                     
-                    <a href="#" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">About Me</a>
-                    <a href="#" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Recent Clips</a>
-                    <a href="#" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Recogized by</a>
-                    <a href="#" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Actively working</a>
-                    <a href="#" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Contact Me</a>
+                    <a href="#about me" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">About Me</a>
+                    <a href="#recent clips" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Recent Clips</a>
+                    <a href="#recogized by" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Recogized by</a>
+                    <a href="#actively working" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Actively working</a>
+                    <a href="#contact" class="p-2 lg:px-4 md:mx-2 text-orange-600 text-center border border-transparent rounded hover:bg-orange-100 hover:text-orange-700 transition-colors duration-300">Contact Me</a>
                   </div>
                 </div>
           </nav>
@@ -128,43 +51,46 @@ $conn->close();
     <!-- Hero Section -->
     <section class="text-gray-600 body-font mr-0 md:mr-28 ml-0 md:ml-28">
         <div class="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
-          <div class="lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center">
-            <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">Before they sold out
-              <br class="hidden lg:inline-block">readymade gluten
-            </h1>
-            <p class="mb-8 leading-relaxed">Copper mug try-hard pitchfork pour-over freegan heirloom neutra air plant cold-pressed tacos poke beard tote bag. Heirloom echo park mlkshk tote bag selvage hot chicken authentic tumeric truffaut hexagon try-hard chambray.</p>
-            <img src="./signature.png" class="h-10 mb-8" alt="">
-            <div class="flex justify-center">
-              <button class="inline-flex text-white bg-orange-500 border-0 py-2 px-6 focus:outline-none hover:bg-orange-600 rounded text-lg">Book a Consultation Call</button>
+            <div class="lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center">
+                <div class="flex">
+                    <img src="https://media.tenor.com/bm8Q6yAlsPsAAAAj/verified.gif" class="w-10 md:w-24 mb-8" alt="">
+                    <h1 class="ml-5 title-font sm:text-8xl text-4xl mb-4 font-bold text-gray-900">Thank <span class="text-orange-600">You!</span></h1>
+                </div>
+                <p class="mb-8 leading-relaxed">Copper mug try-hard pitchfork pour-over freegan heirloom neutra air plant cold-pressed tacos poke beard tote bag. Heirloom echo park mlkshk tote bag selvage hot chicken authentic tumeric truffaut hexagon try-hard chambray.</p>
             </div>
-          </div>
-          <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
-            <img class="object-cover object-center rounded" style="margin-bottom: -95px;" alt="hero" src="./BgNagpur.png">
-          </div>
+            <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
+                <!-- Responsive Table -->
+                <div class="overflow-x-auto">
+                    <table class="table-auto border-collapse border border-gray-300 w-full text-left">
+                        <tbody>
+                            <tr>
+                                <th class="px-2 md:px-4 py-2 border border-gray-300 text-sm md:text-base  bg-orange-100">Name</th>
+                                <td class="px-2 md:px-4 py-2 border border-gray-300 text-sm md:text-base"><?php echo htmlspecialchars($_SESSION['name']); ?></td>
+                            </tr>
+                            <tr>
+                                <th class="px-2 md:px-4 py-2 border border-gray-300 text-sm md:text-base bg-orange-100">Phone</th>
+                                
+                                <td class="px-2 md:px-4 py-2 border border-gray-300 text-sm md:text-base"><?php echo htmlspecialchars($_SESSION['phone']); ?></td>
+                              
+                            </tr>
+                            <tr>
+                                <th class="px-2 md:px-4 py-2 border border-gray-300 text-sm md:text-base bg-orange-100">Email</th>
+                            
+                                <td class="px-2 md:px-4 py-2 border border-gray-300 text-sm md:text-base"><?php echo htmlspecialchars($_SESSION['email']); ?></td>
+                            </tr>
+                            
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </section>
-   
-    <!-- About -->
-<div id="about me" class="bg-orange-100 pt-10 pb-10">
-    <section  class="mr-0 md:mr-36 ml-0 md:ml-36">
-        <h2 class="text-center text-5xl text-gray-900 font-extrabold">About <span class='text-orange-600'>Me</span></h2>
-        <div class="container mx-auto flex px-5 py-10 md:flex-row flex-col items-center">
-        <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6 mb-10 md:mb-0">
-            <img loading="lazy" class="object-cover object-center rounded" alt="hero" src="./2.png">
-        </div>
-        <div class="lg:flex-grow md:w-1/2 lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
-
-            <p class="mb-8 leading-relaxed text-justify">At SQFT INFRA, we understand that buying property is a significant milestone in life. Our mission is to make this journey seamless and fulfilling for you. With a team of dedicated professionals, we offer a range of real estate solutions tailored to meet your unique needs. Whether you are looking to buy, sell, or invest, we are here to guide you every step of the way.</p>
-            <p class="mb-8 leading-relaxed text-justify">Our extensive experience in the industry ensures that we provide accurate, up-to-date information and advice, empowering you to make informed decisions. We pride ourselves on our integrity, transparency, and commitment to customer satisfaction. At SQFT INFRA, your dream property is just a step away. Let us help you find the perfect place to call home.</p>
-            
-        </div>
-        </div>
-    </section>
-  </div>
 
 
-    <!-- Reel videos -->
-    <h2 id="recent clips" class="mt-20 mb-5 text-center text-5xl text-gray-900 font-extrabold">Recent <span class='text-orange-600'>Clips</span></h2>
+      <!-- Reel videos -->
+      <h2 id="recent clips" class="mt-20 text-center text-4xl md:text-5xl md:text-5xl text-gray-900 font-extrabold">Happy <span class='text-orange-600'>Clients</span></h2>
+      <p class="text-center text-md text-gray-900 font-medium mb-10 mt-4">Let’s Chat! Secure Your Consultation Call Today!</p>
     <div class="flex flex-nowrap overflow-x-auto sm:flex-wrap justify-between mr-0 md:mr-36 ml-0 md:ml-36 mb-20">
       <div class="w-56 h-96 flex-shrink-0 p-4">
           <iframe class="w-full h-full rounded-lg" src="https://www.youtube.com/embed/IdezyE70U_s?si=nSopTvaKyiu6pXyT" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
@@ -179,172 +105,42 @@ $conn->close();
           <iframe class="w-full h-full rounded-lg" src="https://www.youtube.com/embed/T-E_EpM4L_w?si=Ek-xDA1--hFQ9bLG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
   </div>
-
-
-    <!-- Recogized by -->
-    <div class="bg-white py-6 sm:py-8 lg:py-12 mr-0 md:mr-36 ml-0 md:ml-36">
-        <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
-            <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">Recogized <span class='text-orange-600'>by</span></h2>
-      
-          <div class="grid grid-cols-2 gap-6 rounded-lg bg-orange-100 p-6 sm:h-40 sm:content-evenly md:grid-cols-4">
-            <!-- logo - start -->
-            <div class="flex justify-center text-orange-500">
-              <img src="https://dummyimage.com/200x100/000/fff" alt="">
-            </div>
-            <!-- logo - end -->
-      
-            <!-- logo - start -->
-            <div class="flex justify-center text-orange-500">
-              <img src="https://dummyimage.com/200x100/000/fff" alt="">
-            </div>
-            <!-- logo - end -->
-      
-            <!-- logo - start -->
-            <div class="flex justify-center text-orange-500">
-              <img src="https://dummyimage.com/200x100/000/fff" alt="">
-            </div>
-            <!-- logo - end -->
-      
-            <!-- logo - start -->
-            <div class="flex justify-center text-orange-500">
-              <img src="https://dummyimage.com/200x100/000/fff" alt="">
-            </div>
-            <!-- logo - end -->
-          </div>
-        </div>
-    </div>
-
-    <!-- Actively working with -->
-    <div class="bg-white py-6 sm:py-8 lg:py-12 mr-0 md:mr-36 ml-0 md:ml-36">
-            <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
-              <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">Actively <span class='text-orange-600'>working</span></h2>
-              <div class="flex justify-center">
-                <img src="./map.png" class="w-full md:w-1/2 max-w-3xl h-auto" alt="">
-            </div>
-        </div>
-    </div>
-
-    <!-- Number of events -->
-    <section  class="text-gray-600 body-font">
-      <div id="events" class="container px-5 py-24 mx-auto">
-        <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">Number of <span class='text-orange-600'>Events</span></h2>
-        <div class="flex flex-wrap -m-4 text-center bg-orange-100 p-10 mt-5">
-          <div class="p-4 sm:w-1/4 w-1/2">
-            <h2 class="title-font font-medium sm:text-7xl text-5xl text-orange-600">2.7K</h2>
-            <p class="leading-relaxed">Users</p>
-          </div>
-          <div class="p-4 sm:w-1/4 w-1/2">
-            <h2 class="title-font font-medium sm:text-7xl text-5xl text-orange-600">2.7K</h2>
-            <p class="leading-relaxed">Subscribes</p>
-          </div>
-          <div class="p-4 sm:w-1/4 w-1/2">
-            <h2 class="title-font font-medium sm:text-7xl text-5xl text-orange-600">2.7K</h2>
-            <p class="leading-relaxed">Downloads</p>
-          </div>
-          <div class="p-4 sm:w-1/4 w-1/2">
-            <h2 class="title-font font-medium sm:text-7xl text-5xl text-orange-600">2.7K</h2>
-            <p class="leading-relaxed">Products</p>
-          </div>
-          
-        </div>
+    
+<!-- cta -->
+    <div class="bg-white py-6 sm:py-8 lg:py-12 mr-0 md:mr-28 ml-0 md:ml-28">
+  <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
+    <div class="flex flex-col items-center justify-between gap-4 rounded-lg bg-orange-100 p-4 sm:flex-row md:p-8">
+      <div>
+        <h2 class="text-xl font-bold text-orange-600 md:text-2xl">Start your free trial</h2>
+        <p class="text-gray-600">No Credit Card required</p>
       </div>
-    </section>
 
-    <!-- #1 Heading Topics -->
-  <section class="text-gray-600 body-font mr-0 md:mr-36 ml-0 md:ml-36">
-    <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">#1 Heading <span class='text-orange-600'>Topics</span></h2>
-    <div class="container mx-auto flex px-5 md:flex-row flex-col items-center">
-        <!-- Removed image section -->
-        <div class="lg:flex-grow md:w-full lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
-            <p class="mb-8 leading-relaxed text-justify">At SQFT INFRA, we understand that buying property is a significant milestone in life. Our mission is to make this journey seamless and fulfilling for you. With a team of dedicated professionals, we offer a range of real estate solutions tailored to meet your unique needs. Whether you are looking to buy, sell, or invest, we are here to guide you every step of the way.</p>
-            <p class="mb-8 leading-relaxed text-justify">Our extensive experience in the industry ensures that we provide accurate, up-to-date information and advice, empowering you to make informed decisions. We pride ourselves on our integrity, transparency, and commitment to customer satisfaction. At SQFT INFRA, your dream property is just a step away. Let us help you find the perfect place to call home.</p>
-            
-         </div>
-       </div>
-  </section>
-
-  <!-- #2 Heading Topics -->
-  <section class="text-gray-600 body-font mr-0 md:mr-36 ml-0 md:ml-36 mt-10">
-    <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">#2 Heading <span class="text-orange-600">Topics</span></h2>
-    <div class="container mx-auto flex px-5 flex-col pb-20 items-center">
-        <!-- Content section -->
-        <div class="lg:flex-grow md:w-full lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
-            <p class="mb-8 leading-relaxed text-justify">At SQFT INFRA, we understand that buying property is a significant milestone in life. Our mission is to make this journey seamless and fulfilling for you. With a team of dedicated professionals, we offer a range of real estate solutions tailored to meet your unique needs. Whether you are looking to buy, sell, or invest, we are here to guide you every step of the way.</p>
-            <p class="mb-8 leading-relaxed text-justify">Our extensive experience in the industry ensures that we provide accurate, up-to-date information and advice, empowering you to make informed decisions. We pride ourselves on our integrity, transparency, and commitment to customer satisfaction. At SQFT INFRA, your dream property is just a step away. Let us help you find the perfect place to call home.</p>
-        </div>
-        <!-- Centered Image -->
-        <div class="flex justify-center">
-          <img src="https://dummyimage.com/600x400/000/fff" class="w-full h-auto mx-auto" alt="img">
-      </div>
-    </div>
-</section>
-
-
- <!-- Parallax Section -->
- <div class="parallax flex items-center justify-center">
-    <div class="text-center text-white">
-      <h1 class="text-5xl font-bold">Welcome to Our Website</h1>
-      <p class="text-xl mt-4">Experience the beauty of the world with us.</p>
+      <a href="https://wa.me/919325152367?text=I%20want%20to%20join%20your%20team
+" class="inline-block rounded-lg bg-orange-500 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-orange-600 focus-visible:ring active:bg-indigo-700 md:text-base">Start now</a>
     </div>
   </div>
-
-
-
-<!-- why choose you -->
-<section class="text-gray-600 body-font mr-0 md:mr-36 ml-0 md:ml-36">
-  <div class="container flex flex-col justify-center px-4 py-8 mx-auto md:p-8">
-      <!-- Heading Section -->
-      <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">#2 Heading <span class="text-orange-600">Topics</span></h2>
-
-      <!-- FAQ Content Section -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <details class="w-full border rounded-lg bg-orange-100">
-              <summary class="px-4 py-6 focus:outline-none focus-visible:ring-violet-600 text-lg font-semibold">Ex orci laoreet egestas sapien magna egestas scelerisque?</summary>
-              <p class="px-4 py-6 pt-0 ml-4 -mt-4 text-gray-600 text-justify">Lectus iaculis orci metus vitae ligula dictum per. Nisl per nullam taciti at adipiscing est.</p>
-          </details>
-          <details class="w-full border rounded-lg  bg-orange-100">
-              <summary class="px-4 py-6 focus:outline-none focus-visible:ring-violet-600 text-lg font-semibold">Lorem at arcu rutrum viverra metus sapien venenatis lobortis odio?</summary>
-              <p class="px-4 py-6 pt-0 ml-4 -mt-4 text-gray-600 text-justify">Tincidunt ut hac condimentum rhoncus phasellus nostra. Magna porttitor egestas tincidunt neque vehicula potenti.</p>
-          </details>
-          <details class="w-full border rounded-lg  bg-orange-100">
-              <summary class="px-4 py-6 focus:outline-none focus-visible:ring-violet-600 text-lg font-semibold">Eleifend feugiat sollicitudin laoreet adipiscing bibendum suscipit erat?</summary>
-              <p class="px-4 py-6 pt-0 ml-4 -mt-4 text-gray-600 text-justify">Justo libero tellus integer tincidunt justo semper consequat venenatis aliquet imperdiet. Ultricies urna proin fusce nulla pretium sodales vel magna et massa euismod vulputate sed.</p>
-          </details>
-          <details class="w-full border rounded-lg bg-orange-100">
-              <summary class="px-4 py-6 focus:outline-none focus-visible:ring-violet-600 text-lg font-semibold">Quisque suscipit ipsum est, eu venenatis leo ornare eget?</summary>
-              <p class="px-4 py-6 pt-0 ml-4 -mt-4 text-gray-600 text-justify">Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget.</p>
-          </details>
-          <details class="w-full border rounded-lg bg-orange-100">
-            <summary class="px-4 py-6 focus:outline-none focus-visible:ring-violet-600 text-lg font-semibold">Quisque suscipit ipsum est, eu venenatis leo ornare eget?</summary>
-            <p class="px-4 py-6 pt-0 ml-4 -mt-4 text-gray-600 text-justify">Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget.</p>
-        </details>
-        <details class="w-full border rounded-lg bg-orange-100">
-          <summary class="px-4 py-6 focus:outline-none focus-visible:ring-violet-600 text-lg font-semibold">Quisque suscipit ipsum est, eu venenatis leo ornare eget?</summary>
-          <p class="px-4 py-6 pt-0 ml-4 -mt-4 text-gray-600 text-justify">Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget.</p>
-      </details>
-      </div>
-  </div>
-</section>
-
+</div>
+    
 
 
 <!-- Testimonial -->
 <section class="text-gray-600 body-font mr-0 md:mr-36 ml-0 md:ml-36">
   <div class="container px-5 py-24 mx-auto">
-    <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">Testi<span class="text-orange-600">monials</span></h2>
-    <div class="flex overflow-x-auto space-x-4 -m-4 pb-5  ">
+    <h2 class="text-center text-4xl md:text-5xl text-gray-900 font-extrabold">Testi<span class="text-orange-600">monials</span></h2>
+    <p class="text-center text-md text-gray-900 font-medium mb-10 mt-4">Transforming Lives in Amazing Ways</p>
+    <div class="flex overflow-x-auto space-x-4 -m-4 pb-5">
       <!-- Testimonial 1 -->
       <div class="p-4 md:w-1/2 w-full shrink-0" style="min-width: 300px;">
         <div class="h-full bg-gray-100 p-8 rounded">
           <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="block w-5 h-5 text-gray-400 mb-4" viewBox="0 0 975.036 975.036">
             <path d="M925.036 57.197h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.399 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l36 76c11.6 24.399 40.3 35.1 65.1 24.399 66.2-28.6 122.101-64.8 167.7-108.8 55.601-53.7 93.7-114.3 114.3-181.9 20.601-67.6 30.9-159.8 30.9-276.8v-239c0-27.599-22.401-50-50-50zM106.036 913.497c65.4-28.5 121-64.699 166.9-108.6 56.1-53.7 94.4-114.1 115-181.2 20.6-67.1 30.899-159.6 30.899-277.5v-239c0-27.6-22.399-50-50-50h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.4 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l35.9 75.8c11.601 24.399 40.501 35.2 65.301 24.399z"></path>
           </svg>
-          <p class="leading-relaxed mb-6">Synth chartreuse iPhone lomo cray raw denim brunch everyday carry neutra before they sold out fixie 90's microdosing. Tacos pinterest fanny pack venmo, post-ironic heirloom try-hard pabst authentic iceland.</p>
+          <p class="leading-relaxed mb-6">"This real estate investment changed my life! The team was supportive every step of the way."</p>
           <a class="inline-flex items-center">
-            <img alt="testimonial" src="https://dummyimage.com/106x106" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
+            <img alt="testimonial" src="./Client/Dr umberkar WCL.png" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
             <span class="flex-grow flex flex-col pl-4">
-              <span class="title-font font-medium text-gray-900">Holden Caulfield</span>
-              <span class="text-gray-500 text-sm">UI DEVELOPER</span>
+              <span class="title-font font-medium text-gray-900">Dr Kiran Umberkar</span>
+              <span class="text-gray-500 text-sm">INVESTOR</span>
             </span>
           </a>
         </div>
@@ -355,113 +151,58 @@ $conn->close();
           <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="block w-5 h-5 text-gray-400 mb-4" viewBox="0 0 975.036 975.036">
             <path d="M925.036 57.197h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.399 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l36 76c11.6 24.399 40.3 35.1 65.1 24.399 66.2-28.6 122.101-64.8 167.7-108.8 55.601-53.7 93.7-114.3 114.3-181.9 20.601-67.6 30.9-159.8 30.9-276.8v-239c0-27.599-22.401-50-50-50zM106.036 913.497c65.4-28.5 121-64.699 166.9-108.6 56.1-53.7 94.4-114.1 115-181.2 20.6-67.1 30.899-159.6 30.899-277.5v-239c0-27.6-22.399-50-50-50h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.4 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l35.9 75.8c11.601 24.399 40.501 35.2 65.301 24.399z"></path>
           </svg>
-          <p class="leading-relaxed mb-6">Synth chartreuse iPhone lomo cray raw denim brunch everyday carry neutra before they sold out fixie 90's microdosing. Tacos pinterest fanny pack venmo, post-ironic heirloom try-hard pabst authentic iceland.</p>
+          <p class="leading-relaxed mb-6">"I never thought investing in real estate could be this straightforward. Highly recommend!"</p>
           <a class="inline-flex items-center">
-            <img alt="testimonial" src="https://dummyimage.com/107x107" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
+            <img alt="testimonial" src="./Client/Santosh Khobragade Bhandara.png" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
             <span class="flex-grow flex flex-col pl-4">
-              <span class="title-font font-medium text-gray-900">Alper Kamu</span>
-              <span class="text-gray-500 text-sm">DESIGNER</span>
+              <span class="title-font font-medium text-gray-900">Santosh Khobragade Bhandara</span>
+              <span class="text-gray-500 text-sm">CUSTOMER</span>
             </span>
           </a>
         </div>
       </div>
-      <!-- Testimonial 2 -->
+      <!-- Testimonial 3 -->
       <div class="p-4 md:w-1/2 w-full shrink-0" style="min-width: 300px;">
         <div class="h-full bg-gray-100 p-8 rounded">
           <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="block w-5 h-5 text-gray-400 mb-4" viewBox="0 0 975.036 975.036">
             <path d="M925.036 57.197h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.399 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l36 76c11.6 24.399 40.3 35.1 65.1 24.399 66.2-28.6 122.101-64.8 167.7-108.8 55.601-53.7 93.7-114.3 114.3-181.9 20.601-67.6 30.9-159.8 30.9-276.8v-239c0-27.599-22.401-50-50-50zM106.036 913.497c65.4-28.5 121-64.699 166.9-108.6 56.1-53.7 94.4-114.1 115-181.2 20.6-67.1 30.899-159.6 30.899-277.5v-239c0-27.6-22.399-50-50-50h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.4 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l35.9 75.8c11.601 24.399 40.501 35.2 65.301 24.399z"></path>
           </svg>
-          <p class="leading-relaxed mb-6">Synth chartreuse iPhone lomo cray raw denim brunch everyday carry neutra before they sold out fixie 90's microdosing. Tacos pinterest fanny pack venmo, post-ironic heirloom try-hard pabst authentic iceland.</p>
+          <p class="leading-relaxed mb-6">"The support from the team was incredible! I felt valued and informed throughout."</p>
           <a class="inline-flex items-center">
-            <img alt="testimonial" src="https://dummyimage.com/107x107" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
+            <img alt="testimonial" src="./Client/Kishor Ashtanker.png" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
             <span class="flex-grow flex flex-col pl-4">
-              <span class="title-font font-medium text-gray-900">Alper Kamu</span>
-              <span class="text-gray-500 text-sm">DESIGNER</span>
+              <span class="title-font font-medium text-gray-900">Kishor Ashtanker</span>
+              <span class="text-gray-500 text-sm">FIRST-TIME BUYER</span>
             </span>
           </a>
         </div>
       </div>
-      <!-- Testimonial 2 -->
+      <!-- Testimonial 4 -->
       <div class="p-4 md:w-1/2 w-full shrink-0" style="min-width: 300px;">
         <div class="h-full bg-gray-100 p-8 rounded">
           <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="block w-5 h-5 text-gray-400 mb-4" viewBox="0 0 975.036 975.036">
             <path d="M925.036 57.197h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.399 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l36 76c11.6 24.399 40.3 35.1 65.1 24.399 66.2-28.6 122.101-64.8 167.7-108.8 55.601-53.7 93.7-114.3 114.3-181.9 20.601-67.6 30.9-159.8 30.9-276.8v-239c0-27.599-22.401-50-50-50zM106.036 913.497c65.4-28.5 121-64.699 166.9-108.6 56.1-53.7 94.4-114.1 115-181.2 20.6-67.1 30.899-159.6 30.899-277.5v-239c0-27.6-22.399-50-50-50h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.4 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l35.9 75.8c11.601 24.399 40.501 35.2 65.301 24.399z"></path>
           </svg>
-          <p class="leading-relaxed mb-6">Synth chartreuse iPhone lomo cray raw denim brunch everyday carry neutra before they sold out fixie 90's microdosing. Tacos pinterest fanny pack venmo, post-ironic heirloom try-hard pabst authentic iceland.</p>
+          <p class="leading-relaxed mb-6">"Our home buying experience was seamless. The team provided exceptional support!"</p>
           <a class="inline-flex items-center">
-            <img alt="testimonial" src="https://dummyimage.com/107x107" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
+            <img alt="testimonial" src="./Client/Nitin Bhaisare bhadrawati.png" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
             <span class="flex-grow flex flex-col pl-4">
-              <span class="title-font font-medium text-gray-900">Alper Kamu</span>
-              <span class="text-gray-500 text-sm">DESIGNER</span>
+              <span class="title-font font-medium text-gray-900">Nitin Bhaisare bhadrawati</span>
+              <span class="text-gray-500 text-sm">HOME BUYER</span>
             </span>
           </a>
         </div>
       </div>
-      <!-- Testimonial 2 -->
-      <div class="p-4 md:w-1/2 w-full shrink-0" style="min-width: 300px;">
-        <div class="h-full bg-gray-100 p-8 rounded">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="block w-5 h-5 text-gray-400 mb-4" viewBox="0 0 975.036 975.036">
-            <path d="M925.036 57.197h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.399 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l36 76c11.6 24.399 40.3 35.1 65.1 24.399 66.2-28.6 122.101-64.8 167.7-108.8 55.601-53.7 93.7-114.3 114.3-181.9 20.601-67.6 30.9-159.8 30.9-276.8v-239c0-27.599-22.401-50-50-50zM106.036 913.497c65.4-28.5 121-64.699 166.9-108.6 56.1-53.7 94.4-114.1 115-181.2 20.6-67.1 30.899-159.6 30.899-277.5v-239c0-27.6-22.399-50-50-50h-304c-27.6 0-50 22.4-50 50v304c0 27.601 22.4 50 50 50h145.5c-1.9 79.601-20.4 143.3-55.4 191.2-27.6 37.8-69.4 69.1-125.3 93.8-25.7 11.3-36.8 41.7-24.8 67.101l35.9 75.8c11.601 24.399 40.501 35.2 65.301 24.399z"></path>
-          </svg>
-          <p class="leading-relaxed mb-6">Synth chartreuse iPhone lomo cray raw denim brunch everyday carry neutra before they sold out fixie 90's microdosing. Tacos pinterest fanny pack venmo, post-ironic heirloom try-hard pabst authentic iceland.</p>
-          <a class="inline-flex items-center">
-            <img alt="testimonial" src="https://dummyimage.com/107x107" class="w-12 h-12 rounded-full flex-shrink-0 object-cover object-center">
-            <span class="flex-grow flex flex-col pl-4">
-              <span class="title-font font-medium text-gray-900">Alper Kamu</span>
-              <span class="text-gray-500 text-sm">DESIGNER</span>
-            </span>
-          </a>
-        </div>
-      </div>
-      <!-- Add more testimonials as needed -->
     </div>
   </div>
 </section>
 
 
-<!-- form -->
-<section class="text-gray-600 body-font relative">
-  <div id="contact" class="container px-5 py-24 mx-auto">
-    <div class="flex flex-col text-center w-full mb-12">
-      <h2 class="text-center text-5xl text-gray-900 font-extrabold mb-10">Book Consultation <span class="text-orange-600">Call</span></h2>
-    </div>
-    <div class="lg:w-1/2 md:w-2/3 mx-auto">
-      <form action="" method="POST">
-        <div class="flex flex-wrap -m-2">
-          <div class="p-2 w-1/2">
-            <div class="relative">
-              <label for="name" class="leading-7 text-sm text-gray-600">Name</label>
-              <input type="text" id="name" name="name" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" required>
-            </div>
-          </div>
-          <div class="p-2 w-1/2">
-            <div class="relative">
-              <label for="phone" class="leading-7 text-sm text-gray-600">Phone Number</label>
-              <input type="tel" id="phone" name="phone" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" required>
-            </div>
-          </div>
-          <div class="p-2 w-full">
-            <div class="relative">
-              <label for="email" class="leading-7 text-sm text-gray-600">Email</label>
-              <input type="email" id="email" name="email" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" required>
-            </div>
-          </div>
-          <div class="p-2 w-full">
-            <button type="submit" class="flex mx-auto text-white bg-orange-500 border-0 py-2 px-8 focus:outline-none hover:bg-orange-600 rounded text-lg">Submit</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</section>
-
-
-
-    <!-- footer -->
-    <div class="bg-orange-50 pt-4 sm:pt-10 lg:pt-12">
+<div class="bg-orange-50 pt-4 sm:pt-10 lg:pt-12">
         <footer class="mx-auto max-w-screen-2xl px-4 md:px-8">
           <div class="flex flex-col items-center border-t pt-6">
-            <img src="https://dummyimage.com/300x100/000/fff" class="mb-4" alt="">
+            <img src="./Image/signclr.png" class="h-36 mb-4" alt="">
+            <h2 class="font-bold mb-4 text-3xl"><span class="text-orange-600">Prathamesh</span> Bansod</h2>
             <!-- nav - start -->
             <nav class="mb-4 flex flex-wrap justify-center gap-x-4 gap-y-2 md:justify-start md:gap-6">
               <a href="#about me" class="text-gray-500 transition duration-100 hover:text-orange-500 active:text-orange-600">About Me</a>
@@ -515,8 +256,12 @@ $conn->close();
         };
       </script>
 
+<script>
 
-<script async src='https://d2mpatx37cqexb.cloudfront.net/delightchat-whatsapp-widget/embeds/embed.min.js'></script>
+
+
+
+
         <script>
           var wa_btnSetting = {"btnColor":"#16BE45","ctaText":"WhatsApp Us","cornerRadius":40,"marginBottom":20,"marginLeft":20,"marginRight":20,"btnPosition":"right","whatsAppNumber":"919325152367","welcomeMessage":" i want to join your team","zIndex":999999,"btnColorScheme":"light"};
           window.onload = () => {
